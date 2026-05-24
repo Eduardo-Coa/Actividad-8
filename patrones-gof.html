@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patrones de Diseño GoF — Actividad 8</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #21253a;
+    --border: #2e3350;
+    --text: #e2e8f0;
+    --muted: #8892b0;
+    --accent-cr: #f6a800;
+    --accent-st: #00bcd4;
+    --accent-co: #7c4dff;
+    --green: #4ec94e;
+    --red: #ff5370;
+    --heading: #cdd6f4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #12152b 0%, #1e2240 100%);
+    border-bottom: 2px solid var(--border);
+    padding: 40px 48px 32px;
+  }
+  header h1 { font-size: 2rem; color: var(--heading); letter-spacing: -0.5px; }
+  header .subtitle { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-right: 6px;
+  }
+  .badge-cr { background: #3a2800; color: var(--accent-cr); border: 1px solid #5a4000; }
+  .badge-st { background: #002a30; color: var(--accent-st); border: 1px solid #004850; }
+  .badge-co { background: #1a0e3a; color: #b39dff; border: 1px solid #3a2870; }
+
+  /* Nav */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 48px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color .2s;
+  }
+  nav a:hover { color: var(--text); }
+  nav a.cr { color: var(--accent-cr); }
+  nav a.st { color: var(--accent-st); }
+  nav a.co { color: #b39dff; }
+
+  /* Layout */
+  main { max-width: 1400px; margin: 0 auto; padding: 40px 24px 80px; }
+  .intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .intro-item h3 { color: var(--heading); font-size: 0.9rem; margin-bottom: 6px; }
+  .intro-item p  { color: var(--muted); font-size: 0.85rem; }
+
+  /* Category section */
+  .category { margin-bottom: 60px; }
+  .cat-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 2px solid;
+  }
+  .cat-cr .cat-title { background: #1e1500; color: var(--accent-cr); border-color: var(--accent-cr); }
+  .cat-st .cat-title { background: #001a1e; color: var(--accent-st); border-color: var(--accent-st); }
+  .cat-co .cat-title { background: #12092a; color: #b39dff; border-color: #7c4dff; }
+
+  /* Table */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,.025); }
+  td {
+    padding: 14px;
+    vertical-align: top;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+
+  /* Column widths */
+  .col-num   { width: 36px; text-align: center; color: var(--muted); font-weight: 700; }
+  .col-name  { width: 160px; font-weight: 700; color: var(--heading); }
+  .col-prob  { min-width: 200px; }
+  .col-diag  { min-width: 230px; }
+  .col-use   { min-width: 200px; }
+  .col-vd    { min-width: 200px; }
+  .col-rel   { min-width: 170px; }
+
+  /* Pattern name badge */
+  .pat-num { font-size: 0.7rem; color: var(--muted); display: block; margin-bottom: 2px; }
+
+  /* Diagram cell */
+  .diagram {
+    background: #0a0c16;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.78rem;
+    color: #a9b1d6;
+    white-space: pre;
+    line-height: 1.45;
+  }
+
+  /* Pro/Con */
+  .pro { color: var(--green); }
+  .con { color: #ff6e7a; }
+
+  /* Related */
+  .rel-tag {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 2px 2px 2px 0;
+    white-space: nowrap;
+  }
+
+  /* Use case list */
+  .use-list { padding-left: 16px; }
+  .use-list li { margin-bottom: 3px; }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding: 32px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Patrones de Diseño GoF</h1>
+  <p class="subtitle">
+    Gang of Four — Gamma, Helm, Johnson, Vlissides (1994) &nbsp;·&nbsp;
+    Lenguaje de Programación II — 3er semestre, Ciencia de Datos
+  </p>
+  <div style="margin-top:14px;">
+    <span class="badge badge-cr">5 Creacionales</span>
+    <span class="badge badge-st">7 Estructurales</span>
+    <span class="badge badge-co">11 De Comportamiento</span>
+  </div>
+</header>
+
+<nav>
+  <span style="color:var(--muted);font-size:.8rem;align-self:center;">Ir a:</span>
+  <a class="cr" href="#creacionales">Creacionales</a>
+  <a class="st" href="#estructurales">Estructurales</a>
+  <a class="co" href="#comportamiento">Comportamiento</a>
+</nav>
+
+<main>
+
+  <div class="intro">
+    <div class="intro-item">
+      <h3>¿Qué son los patrones GoF?</h3>
+      <p>Soluciones reutilizables a problemas recurrentes en diseño orientado a objetos, documentadas por los cuatro autores en 1994.</p>
+    </div>
+    <div class="intro-item">
+      <h3>Creacionales</h3>
+      <p>Abstraen el proceso de instanciación, desacoplando la creación de objetos de su uso.</p>
+    </div>
+    <div class="intro-item">
+      <h3>Estructurales</h3>
+      <p>Componen clases u objetos en estructuras más grandes manteniendo flexibilidad.</p>
+    </div>
+    <div class="intro-item">
+      <h3>De comportamiento</h3>
+      <p>Definen la comunicación y distribución de responsabilidades entre objetos.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- CREACIONALES                                                  -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="category cat-cr" id="creacionales">
+    <div class="cat-title">Patrones Creacionales</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-name">Nombre</th>
+            <th class="col-prob">Problema que resuelve</th>
+            <th class="col-diag">Diagrama de clases</th>
+            <th class="col-use">Casos de uso</th>
+            <th class="col-vd">Ventajas / Desventajas</th>
+            <th class="col-rel">Patrones relacionados</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 1. Abstract Factory -->
+          <tr>
+            <td class="col-num">1</td>
+            <td class="col-name"><span class="pat-num">Creacional</span>Abstract Factory</td>
+            <td>Crear familias de objetos relacionados sin especificar sus clases concretas.</td>
+            <td><div class="diagram">«interface»
+AbstractFactory
+  +crearProductoA()
+  +crearProductoB()
+       △
+  ┌────┴────┐
+Fábrica1  Fábrica2
+  │           │
+ProdA1     ProdA2
+ProdB1     ProdB2</div></td>
+            <td><ul class="use-list">
+              <li>Kits de UI multiplataforma</li>
+              <li>Conexión a múltiples BD</li>
+              <li>Generadores PDF/Word</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Consistencia entre productos; fácil intercambiar familia.</span><br>
+              <span class="con">✘ Difícil añadir nuevos tipos de producto; proliferación de clases.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Factory Method</span>
+              <span class="rel-tag">Prototype</span>
+              <span class="rel-tag">Singleton</span>
+            </td>
+          </tr>
+          <!-- 2. Builder -->
+          <tr>
+            <td class="col-num">2</td>
+            <td class="col-name"><span class="pat-num">Creacional</span>Builder</td>
+            <td>Construir objetos complejos paso a paso separando construcción de representación.</td>
+            <td><div class="diagram">Director
+  +construir(b: Builder)
+       │
+       ▼
+«interface»
+Builder
+  +paso1()
+  +paso2()
+  +resultado()
+       △
+       │
+ConcreteBuilder
+       │
+       ▼
+    Product</div></td>
+            <td><ul class="use-list">
+              <li>Constructores de SQL</li>
+              <li>Generadores de XML/HTML</li>
+              <li>Config con muchos parámetros</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Control fino del proceso; reutilización del mismo proceso.</span><br>
+              <span class="con">✘ Requiere clase Builder específica por variante.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Abstract Factory</span>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">Prototype</span>
+            </td>
+          </tr>
+          <!-- 3. Factory Method -->
+          <tr>
+            <td class="col-num">3</td>
+            <td class="col-name"><span class="pat-num">Creacional</span>Factory Method</td>
+            <td>Definir una interfaz para crear un objeto, dejando que las subclases decidan qué clase instanciar.</td>
+            <td><div class="diagram">«abstract»
+Creator
+  +factoryMethod()→Product
+       △
+       │
+ConcreteCreator
+  +factoryMethod()
+
+«interface»        △
+Product    ◄───  ConcreteProduct</div></td>
+            <td><ul class="use-list">
+              <li>Frameworks de logging</li>
+              <li>Parsers de distintos formatos</li>
+              <li>Creadores de conexiones</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Elimina acoplamiento al tipo concreto; respeta Open/Closed.</span><br>
+              <span class="con">✘ Puede generar muchas subclases.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Abstract Factory</span>
+              <span class="rel-tag">Template Method</span>
+              <span class="rel-tag">Prototype</span>
+            </td>
+          </tr>
+          <!-- 4. Prototype -->
+          <tr>
+            <td class="col-num">4</td>
+            <td class="col-name"><span class="pat-num">Creacional</span>Prototype</td>
+            <td>Crear nuevos objetos clonando instancias existentes en lugar de instanciar desde cero.</td>
+            <td><div class="diagram">«interface»
+Prototype
+  +clone()→Prototype
+       △
+  ┌────┴────┐
+Proto1    Proto2
+  +clone()  +clone()</div></td>
+            <td><ul class="use-list">
+              <li>Editores gráficos (copiar/pegar)</li>
+              <li>Configuraciones predeterminadas</li>
+              <li>Caché de objetos costosos</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Evita clases Factory; reduce coste de inicialización.</span><br>
+              <span class="con">✘ Clonar con referencias circulares o recursos externos es complejo.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Abstract Factory</span>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">Memento</span>
+            </td>
+          </tr>
+          <!-- 5. Singleton -->
+          <tr>
+            <td class="col-num">5</td>
+            <td class="col-name"><span class="pat-num">Creacional</span>Singleton</td>
+            <td>Garantizar que una clase tenga una única instancia y proporcionar un punto de acceso global.</td>
+            <td><div class="diagram">Singleton
+  -instancia: Singleton
+  -Singleton()
+  +getInstance()→Singleton
+  +operacion()</div></td>
+            <td><ul class="use-list">
+              <li>Logger global</li>
+              <li>Configuración de aplicación</li>
+              <li>Pool de conexiones / caché</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Garantía de instancia única; acceso centralizado.</span><br>
+              <span class="con">✘ Dificulta testing; viola SRP; introduce estado global.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Abstract Factory</span>
+              <span class="rel-tag">Builder</span>
+              <span class="rel-tag">Facade</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- ESTRUCTURALES                                                 -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="category cat-st" id="estructurales">
+    <div class="cat-title">Patrones Estructurales</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-name">Nombre</th>
+            <th class="col-prob">Problema que resuelve</th>
+            <th class="col-diag">Diagrama de clases</th>
+            <th class="col-use">Casos de uso</th>
+            <th class="col-vd">Ventajas / Desventajas</th>
+            <th class="col-rel">Patrones relacionados</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 6. Adapter -->
+          <tr>
+            <td class="col-num">6</td>
+            <td class="col-name"><span class="pat-num">Estructural</span>Adapter</td>
+            <td>Convertir la interfaz de una clase en otra que los clientes esperan, permitiendo la interoperabilidad.</td>
+            <td><div class="diagram">Client
+  │ usa
+  ▼
+«interface»
+Target
+  +peticion()
+       △
+       │
+   Adapter──────►Adaptee
+   +peticion()    +peticionEspecifica()</div></td>
+            <td><ul class="use-list">
+              <li>Integración de librerías legadas</li>
+              <li>Adaptadores XML → JSON</li>
+              <li>Wrappers sobre APIs de terceros</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Reutiliza clases existentes sin modificarlas.</span><br>
+              <span class="con">✘ Aumenta complejidad; puede requerir adaptar muchos métodos.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Bridge</span>
+              <span class="rel-tag">Decorator</span>
+              <span class="rel-tag">Proxy</span>
+              <span class="rel-tag">Facade</span>
+            </td>
+          </tr>
+          <!-- 7. Bridge -->
+          <tr>
+            <td class="col-num">7</td>
+            <td class="col-name"><span class="pat-num">Estructural</span>Bridge</td>
+            <td>Separar la abstracción de su implementación para que ambas puedan variar independientemente.</td>
+            <td><div class="diagram">Abstraction──────►«interface»
+  +operacion()      Implementor
+       △             +operacionImpl()
+       │                  △
+RefinedAbstraction   ┌────┴────┐
+                  ImplA     ImplB</div></td>
+            <td><ul class="use-list">
+              <li>Drivers de dispositivos</li>
+              <li>Motores de renderizado</li>
+              <li>GUI multiplataforma</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Independencia en ambas dimensiones; extensible.</span><br>
+              <span class="con">✘ Mayor complejidad de diseño inicial.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Abstract Factory</span>
+              <span class="rel-tag">Adapter</span>
+              <span class="rel-tag">Strategy</span>
+            </td>
+          </tr>
+          <!-- 8. Composite -->
+          <tr>
+            <td class="col-num">8</td>
+            <td class="col-name"><span class="pat-num">Estructural</span>Composite</td>
+            <td>Componer objetos en estructuras de árbol y tratar objetos individuales y compuestos uniformemente.</td>
+            <td><div class="diagram">«interface»
+Component
+  +operacion()
+       △
+  ┌────┴────┐
+Leaf     Composite
+           -hijos: []Component
+           +agregar(c)
+           +operacion()</div></td>
+            <td><ul class="use-list">
+              <li>Sistemas de archivos</li>
+              <li>Menús de GUI anidados</li>
+              <li>Expresiones matemáticas</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Trata uniformemente hojas y compuestos.</span><br>
+              <span class="con">✘ Diseño demasiado general; restricciones de tipos son difíciles.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Decorator</span>
+              <span class="rel-tag">Flyweight</span>
+              <span class="rel-tag">Iterator</span>
+              <span class="rel-tag">Visitor</span>
+            </td>
+          </tr>
+          <!-- 9. Decorator -->
+          <tr>
+            <td class="col-num">9</td>
+            <td class="col-name"><span class="pat-num">Estructural</span>Decorator</td>
+            <td>Añadir responsabilidades a objetos dinámicamente, sin usar herencia.</td>
+            <td><div class="diagram">«interface»
+Component
+  +operacion()
+       △
+  ┌────┴──────┐
+Concrete   Decorator──►Component
+Component   +operacion()
+                 △
+           ┌─────┴─────┐
+         DecA         DecB</div></td>
+            <td><ul class="use-list">
+              <li>Streams de I/O en Java</li>
+              <li>Middlewares HTTP</li>
+              <li>Validadores encadenados</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Más flexible que herencia; respeta Open/Closed.</span><br>
+              <span class="con">✘ Muchos objetos pequeños; depuración compleja.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Adapter</span>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">Proxy</span>
+              <span class="rel-tag">Strategy</span>
+            </td>
+          </tr>
+          <!-- 10. Facade -->
+          <tr>
+            <td class="col-num">10</td>
+            <td class="col-name"><span class="pat-num">Estructural</span>Facade</td>
+            <td>Proporcionar una interfaz simplificada a un conjunto complejo de interfaces en un subsistema.</td>
+            <td><div class="diagram">Client
+  │
+  ▼
+Facade
+  +operacionSimple()
+  │      │      │
+  ▼      ▼      ▼
+ClsA   ClsB   ClsC</div></td>
+            <td><ul class="use-list">
+              <li>SDKs de servicios externos</li>
+              <li>Capas de servicio en apps</li>
+              <li>APIs de bibliotecas multimedia</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Simplifica uso; desacopla al cliente de la complejidad.</span><br>
+              <span class="con">✘ Puede convertirse en un <em>god object</em>.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Abstract Factory</span>
+              <span class="rel-tag">Mediator</span>
+              <span class="rel-tag">Singleton</span>
+            </td>
+          </tr>
+          <!-- 11. Flyweight -->
+          <tr>
+            <td class="col-num">11</td>
+            <td class="col-name"><span class="pat-num">Estructural</span>Flyweight</td>
+            <td>Usar compartición de objetos para soportar eficientemente gran cantidad de objetos de grano fino.</td>
+            <td><div class="diagram">FlyweightFactory
+  -pool: Map&lt;key, Flyweight&gt;
+  +getFlyweight(key)
+       │
+       ▼
+«interface»
+Flyweight
+  +operacion(estadoExterno)
+       △
+  ┌────┴─────┐
+ConcreteFW  UnsharedFW</div></td>
+            <td><ul class="use-list">
+              <li>Caracteres en procesadores de texto</li>
+              <li>Partículas en videojuegos</li>
+              <li>Íconos repetidos en GUIs</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Reduce drásticamente el uso de memoria.</span><br>
+              <span class="con">✘ Mayor complejidad; estado extrínseco debe gestionarse externamente.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">State</span>
+              <span class="rel-tag">Strategy</span>
+            </td>
+          </tr>
+          <!-- 12. Proxy -->
+          <tr>
+            <td class="col-num">12</td>
+            <td class="col-name"><span class="pat-num">Estructural</span>Proxy</td>
+            <td>Proporcionar un sustituto que controla el acceso a otro objeto.</td>
+            <td><div class="diagram">Client
+  │ usa
+  ▼
+«interface»
+Subject
+  +peticion()
+       △
+  ┌────┴────┐
+Proxy  RealSubject
+  │
+  └──referencia──►RealSubject</div></td>
+            <td><ul class="use-list">
+              <li>Lazy loading de objetos costosos</li>
+              <li>Control de acceso / autorización</li>
+              <li>Caché, logging, objetos remotos</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Transparente para el cliente; añade control sin modificar el Real.</span><br>
+              <span class="con">✘ Introduce indirección; respuesta más lenta.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Adapter</span>
+              <span class="rel-tag">Decorator</span>
+              <span class="rel-tag">Facade</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- COMPORTAMIENTO                                                -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="category cat-co" id="comportamiento">
+    <div class="cat-title">Patrones de Comportamiento</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-name">Nombre</th>
+            <th class="col-prob">Problema que resuelve</th>
+            <th class="col-diag">Diagrama de clases</th>
+            <th class="col-use">Casos de uso</th>
+            <th class="col-vd">Ventajas / Desventajas</th>
+            <th class="col-rel">Patrones relacionados</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 13. Chain of Responsibility -->
+          <tr>
+            <td class="col-num">13</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Chain of Responsibility</td>
+            <td>Pasar solicitudes a lo largo de una cadena de manejadores hasta que uno la procese.</td>
+            <td><div class="diagram">«abstract»
+Handler
+  -sucesor: Handler
+  +manejar(peticion)
+       △
+  ┌────┴────┐
+Handler1  Handler2
+  (procesa  (delega
+  o delega)  o termina)</div></td>
+            <td><ul class="use-list">
+              <li>Middleware HTTP</li>
+              <li>Aprobación por niveles</li>
+              <li>Filtros de eventos / logs</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Desacopla emisor de receptores; flexible para añadir manejadores.</span><br>
+              <span class="con">✘ No garantiza que la solicitud sea atendida.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Command</span>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">Decorator</span>
+            </td>
+          </tr>
+          <!-- 14. Command -->
+          <tr>
+            <td class="col-num">14</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Command</td>
+            <td>Encapsular una solicitud como objeto para parametrizar, encolar, registrar y soportar deshacer.</td>
+            <td><div class="diagram">Client──►ConcreteCommand──►Receiver
+               implements            +accion()
+«interface»
+Command
+  +execute()
+  +undo()
+       △
+       │
+Invoker──►Command
+  +ejecutar()</div></td>
+            <td><ul class="use-list">
+              <li>Undo/Redo en editores</li>
+              <li>Colas de transacciones</li>
+              <li>Macros y acciones de menús</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Desacopla emisor de receptor; soporte nativo de undo/redo.</span><br>
+              <span class="con">✘ Proliferación de clases Command por cada operación.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Chain of Resp.</span>
+              <span class="rel-tag">Memento</span>
+              <span class="rel-tag">Observer</span>
+              <span class="rel-tag">Strategy</span>
+            </td>
+          </tr>
+          <!-- 15. Interpreter -->
+          <tr>
+            <td class="col-num">15</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Interpreter</td>
+            <td>Definir representación gramatical de un lenguaje y un intérprete para evaluar sus sentencias.</td>
+            <td><div class="diagram">Context
+«abstract»
+AbstractExpression
+  +interpret(ctx)
+       △
+  ┌────┴─────────┐
+Terminal     NonTerminal
+Expression   Expression
+             -expresiones[]</div></td>
+            <td><ul class="use-list">
+              <li>Parsers de SQL</li>
+              <li>Expresiones regulares</li>
+              <li>Calculadoras de expresiones</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Fácil añadir nuevas expresiones; gramática explícita.</span><br>
+              <span class="con">✘ Ineficiente y difícil de mantener en gramáticas complejas.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">Flyweight</span>
+              <span class="rel-tag">Iterator</span>
+              <span class="rel-tag">Visitor</span>
+            </td>
+          </tr>
+          <!-- 16. Iterator -->
+          <tr>
+            <td class="col-num">16</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Iterator</td>
+            <td>Proporcionar acceso secuencial a elementos de un agregado sin exponer su representación interna.</td>
+            <td><div class="diagram">«interface»       «interface»
+Aggregate         Iterator
++createIterator() +next()
+      △            +hasNext()
+      │                △
+ConcreteAggregate  ConcreteIterator
+                    referencia Aggregate</div></td>
+            <td><ul class="use-list">
+              <li>Recorrido de colecciones</li>
+              <li>Streams de datos</li>
+              <li>Paginación de resultados</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Interfaz uniforme para distintas colecciones; múltiples iteradores.</span><br>
+              <span class="con">✘ Puede ser innecesario para colecciones muy simples.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">Memento</span>
+              <span class="rel-tag">Factory Method</span>
+            </td>
+          </tr>
+          <!-- 17. Mediator -->
+          <tr>
+            <td class="col-num">17</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Mediator</td>
+            <td>Definir un objeto que encapsula cómo interactúan un conjunto de objetos, reduciendo dependencias.</td>
+            <td><div class="diagram">«interface»
+Mediator
+  +notificar(e, datos)
+       △
+ConcreteMediator
+  │──►ColleagueA
+  │──►ColleagueB
+«abstract»
+Colleague
+  -mediador: Mediator</div></td>
+            <td><ul class="use-list">
+              <li>Salas de chat</li>
+              <li>Control de tráfico aéreo</li>
+              <li>Formularios con validación cruzada</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Reduce acoplamiento; centraliza lógica de coordinación.</span><br>
+              <span class="con">✘ El mediador puede volverse un <em>god object</em>.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Facade</span>
+              <span class="rel-tag">Observer</span>
+              <span class="rel-tag">Command</span>
+            </td>
+          </tr>
+          <!-- 18. Memento -->
+          <tr>
+            <td class="col-num">18</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Memento</td>
+            <td>Capturar y externalizar el estado interno de un objeto sin violar encapsulamiento, para restaurarlo después.</td>
+            <td><div class="diagram">Originator
+  +crearMemento()
+  +restaurar(m)
+       │ crea
+       ▼
+   Memento
+  -estado (opaco)
+
+Caretaker
+  -historial: []Memento</div></td>
+            <td><ul class="use-list">
+              <li>Undo/Redo</li>
+              <li>Snapshots y checkpoints</li>
+              <li>Transacciones reversibles</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Preserva encapsulamiento; restauración simple.</span><br>
+              <span class="con">✘ Alto consumo de memoria si los estados son grandes o frecuentes.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Command</span>
+              <span class="rel-tag">Iterator</span>
+              <span class="rel-tag">Prototype</span>
+            </td>
+          </tr>
+          <!-- 19. Observer -->
+          <tr>
+            <td class="col-num">19</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Observer</td>
+            <td>Definir dependencia uno-a-muchos para que al cambiar un objeto sus dependientes sean notificados.</td>
+            <td><div class="diagram">«interface»
+Subject
+  +suscribir(o)
+  +notificar()
+       △
+ConcreteSubject   «interface»
+  -observadores[] Observer
+  -estado         +actualizar()
+                       △
+                  ConcreteObserver</div></td>
+            <td><ul class="use-list">
+              <li>Eventos de GUI</li>
+              <li>MVC: modelo → vistas</li>
+              <li>Pub/Sub, reactive streams</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Acoplamiento débil; soporte broadcast; extensible.</span><br>
+              <span class="con">✘ Actualizaciones en cascada; orden no garantizado; difícil depurar.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Mediator</span>
+              <span class="rel-tag">Singleton</span>
+              <span class="rel-tag">Command</span>
+            </td>
+          </tr>
+          <!-- 20. State -->
+          <tr>
+            <td class="col-num">20</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>State</td>
+            <td>Permitir que un objeto altere su comportamiento cuando su estado interno cambia, simulando un cambio de clase.</td>
+            <td><div class="diagram">Context
+  -estado: State
+  +peticion()
+       │ delega
+       ▼
+«interface»
+State
+  +manejar(ctx)
+       △
+  ┌────┴────┐
+EstadoA  EstadoB</div></td>
+            <td><ul class="use-list">
+              <li>Máquinas expendedoras</li>
+              <li>Estados de pedido</li>
+              <li>Reproductores multimedia</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Elimina condicionales extensos; organiza código por estado.</span><br>
+              <span class="con">✘ Muchas clases pequeñas para pocos estados simples.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Flyweight</span>
+              <span class="rel-tag">Singleton</span>
+              <span class="rel-tag">Strategy</span>
+            </td>
+          </tr>
+          <!-- 21. Strategy -->
+          <tr>
+            <td class="col-num">21</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Strategy</td>
+            <td>Definir una familia de algoritmos, encapsular cada uno e intercambiarlos en tiempo de ejecución.</td>
+            <td><div class="diagram">Context
+  -estrategia: Strategy
+  +ejecutar()
+       │ delega
+       ▼
+«interface»
+Strategy
+  +algoritmo()
+       △
+  ┌────┴────┐
+EstrA    EstrB</div></td>
+            <td><ul class="use-list">
+              <li>Algoritmos de ordenamiento</li>
+              <li>Métodos de pago</li>
+              <li>Compresión de archivos</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Elimina condicionales; fácil añadir estrategias; respeta Open/Closed.</span><br>
+              <span class="con">✘ El cliente debe conocer las diferencias entre estrategias.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Bridge</span>
+              <span class="rel-tag">Decorator</span>
+              <span class="rel-tag">State</span>
+              <span class="rel-tag">Template Method</span>
+            </td>
+          </tr>
+          <!-- 22. Template Method -->
+          <tr>
+            <td class="col-num">22</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Template Method</td>
+            <td>Definir el esqueleto de un algoritmo en una clase base, difiriendo pasos específicos a subclases.</td>
+            <td><div class="diagram">«abstract»
+AbstractClass
+  +templateMethod()
+    paso1()  ← fijo
+    paso2()  ← abstracto
+    paso3()  ← fijo
+       △
+       │
+ConcreteClass
+  +paso2()  ← implementado</div></td>
+            <td><ul class="use-list">
+              <li>Frameworks de testing</li>
+              <li>Parsers de distintos formatos</li>
+              <li>Generadores de reportes</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Reutilización del esqueleto; control de la estructura del algoritmo.</span><br>
+              <span class="con">✘ Limitado a herencia; muchos pasos variables dificultan mantenimiento.</span>
+            </td>
+            <td>
+              <span class="rel-tag">Factory Method</span>
+              <span class="rel-tag">Strategy</span>
+            </td>
+          </tr>
+          <!-- 23. Visitor -->
+          <tr>
+            <td class="col-num">23</td>
+            <td class="col-name"><span class="pat-num">Comportamiento</span>Visitor</td>
+            <td>Separar un algoritmo de la estructura de objetos sobre la que opera, sin modificar los elementos.</td>
+            <td><div class="diagram">«interface»
+Visitor
+  +visit(ElementoA)
+  +visit(ElementoB)
+       △
+  VisitorConcreto
+
+«interface»
+Element
+  +accept(Visitor)
+       △
+  ┌────┴────┐
+ElemA    ElemB
+  +accept() +accept()</div></td>
+            <td><ul class="use-list">
+              <li>Recorrido de AST en compiladores</li>
+              <li>Exportadores a distintos formatos</li>
+              <li>Reportes sobre estructuras de datos</li>
+            </ul></td>
+            <td>
+              <span class="pro">✔ Fácil añadir operaciones nuevas; agrupa operaciones relacionadas.</span><br>
+              <span class="con">✘ Difícil añadir nuevas clases de elemento (requiere modificar todos los Visitor).</span>
+            </td>
+            <td>
+              <span class="rel-tag">Composite</span>
+              <span class="rel-tag">Interpreter</span>
+              <span class="rel-tag">Iterator</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Referencia: Gamma, E., Helm, R., Johnson, R., Vlissides, J. (1994). <em>Design Patterns: Elements of Reusable Object-Oriented Software.</em> Addison-Wesley. &nbsp;·&nbsp; Actividad 8 — Lenguaje de Programación II
+</footer>
+
+</body>
+</html>
