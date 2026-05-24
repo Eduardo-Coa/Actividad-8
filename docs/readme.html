@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Actividad 8 - Practica GoF</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f5f7fa;
+      color: #1f2933;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+      background: #ffffff;
+    }
+    h1 { border-bottom: 4px solid #1f7a8c; padding-bottom: 12px; }
+    h1, h2, h3 { color: #102a43; }
+    pre {
+      overflow-x: auto;
+      background: #0b1720;
+      color: #e6edf3;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    code { background: #eef2f7; padding: 0.1rem 0.25rem; }
+    pre code { background: transparent; padding: 0; }
+  </style>
+</head>
+<body>
+  <main>
+<h1>Actividad 8 - Practica GoF con Estudiante</h1>
+<h2>Objetivo</h2>
+<p>Implementar ejemplos aplicados al proyecto de asignatura usando la clase
+<code>Estudiante</code> y los patrones GoF asignados: <strong>Builder</strong> y
+<strong>Factory Method</strong>.</p>
+<h2>Builder</h2>
+<p>El patron Builder se aplica mediante <code>EstudianteBuilder</code>, encargado de
+construir un <code>Estudiante</code> paso a paso. Esto evita constructores largos en
+la interfaz de usuario o en servicios de negocio.</p>
+<pre><code class="language-mermaid">classDiagram
+    class EstudianteBuilder {
+        +con_codigo(codigo)
+        +con_nombre(nombre)
+        +con_edad(edad)
+        +con_semestre(semestre)
+        +con_correo(correo)
+        +con_programa(programa)
+        +construir() Estudiante
+    }
+    class Estudiante {
+        +codigo: str
+        +nombre_completo: str
+        +edad: int
+        +semestre: int
+        +correo: str
+        +programa: str
+    }
+    EstudianteBuilder --&gt; Estudiante
+</code></pre>
+<h2>Factory Method</h2>
+<p>Factory Method se aplica con <code>EstudianteRepositoryCreator</code>, que define el
+metodo <code>crear_repositorio()</code>. Sus creadores concretos devuelven un
+repositorio en memoria o un repositorio JSON sin que el cliente dependa
+directamente de la clase concreta.</p>
+<pre><code class="language-mermaid">classDiagram
+    class EstudianteRepositoryCreator {
+        &lt;&lt;abstract&gt;&gt;
+        +crear_repositorio() IEstudianteRepository
+    }
+    class MemoryRepositoryCreator
+    class JsonRepositoryCreator
+    class IEstudianteRepository {
+        &lt;&lt;interface&gt;&gt;
+        +guardar(estudiante)
+        +listar()
+    }
+    class EstudianteMemoryRepository
+    class EstudianteJsonRepository
+    EstudianteRepositoryCreator &lt;|-- MemoryRepositoryCreator
+    EstudianteRepositoryCreator &lt;|-- JsonRepositoryCreator
+    IEstudianteRepository &lt;|.. EstudianteMemoryRepository
+    IEstudianteRepository &lt;|.. EstudianteJsonRepository
+</code></pre>
+<h2>Casos de prueba</h2>
+<p>Builder:</p>
+<ol>
+<li><code>test_builder_construye_estudiante_valido</code> valida construccion y
+   normalizacion de codigo/correo.</li>
+<li><code>test_builder_rechaza_estudiante_sin_edad</code> valida rechazo de datos
+   obligatorios incompletos.</li>
+</ol>
+<p>Factory Method:</p>
+<ol>
+<li><code>test_factory_method_crea_repositorio_en_memoria</code> valida el creator de
+   repositorio en memoria.</li>
+<li><code>test_factory_method_crea_repositorio_json</code> valida el creator de
+   repositorio JSON.</li>
+</ol>
+<h2>Comandos</h2>
+<pre><code class="language-bash">python3 main.py
+python3 -m pytest -v -o cache_dir=/tmp/actividad8_pytest_cache
+python3 -m flake8 . --max-line-length=79
+</code></pre>
+<p>La evidencia de funcionamiento esta en <code>docs/evidencia_pruebas.txt</code>.</p>
+  </main>
+</body>
+</html>
