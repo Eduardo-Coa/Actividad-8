@@ -1,0 +1,14 @@
+"""Constantes de dominio para el cuestionario PHQ-9."""
+
+NUM_ITEMS_PHQ9: int = 9
+PUNTAJE_MINIMO_ITEM: int = 0
+PUNTAJE_MAXIMO_ITEM: int = 3
+PUNTAJE_MAXIMO_PHQ9: int = 27
+
+PUNTAJE_RIESGO_LEVE_PHQ9: int = 5
+PUNTAJE_RIESGO_MODERADO_PHQ9: int = 10
+PUNTAJE_RIESGO_MODSEVERO_PHQ9: int = 15
+PUNTAJE_RIESGO_SEVERO_PHQ9: int = 20
+
+RUTA_DATOS_JSON: str = "data/cuestionarios.json"
+FORMATO_FECHA_DISPLAY: str = "%d/%m/%Y %H:%M"
