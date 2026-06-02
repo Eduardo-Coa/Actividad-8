@@ -1,7 +1,7 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
-*.pyd
 
 # Tests
 .pytest_cache/
@@ -12,10 +12,6 @@ __pycache__/
 venv/
 env/
 
-#IDES
-.idea/
+# IDEs
 .vscode/
-
-
-CLAUDE.md
-
+.idea/
