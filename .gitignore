@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Tests
+.pytest_cache/
+.coverage
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+#IDES
+.idea/
+.vscode/
+
+
+CLAUDE.md
+
