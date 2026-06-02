@@ -15,7 +15,7 @@ from app.commands.comandos_cuestionario import (
     HistorialComandos,
     RegistrarCuestionarioComando,
 )
-from app.config.configuracion_app import ConfiguracionApp
+from app.config_Singleton.configuracion_app import ConfiguracionApp
 from app.decorators.repositorio_con_log import RepositorioConLog
 from app.facades.sistema_evaluacion_facade import SistemaEvaluacionFacade
 from app.factories.generador_reporte import GeneradorReporteCSV, GeneradorReporteTexto
